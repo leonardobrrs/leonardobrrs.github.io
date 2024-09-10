@@ -98,7 +98,6 @@
         <button onclick="selectDrink('2')">Pepsi</button>
         <button onclick="selectDrink('3')">Fanta</button>
         <button onclick="cancel()">Cancelar</button>
-        <button onclick="resetMachine()" style="background-color: red;">Resetar Máquina</button>
     </div>
 
     <div class="automaton">
@@ -135,6 +134,11 @@
         document.getElementById("automaton-image").src = `estado${currentState}.png`;
         logTransaction(newState);
         updateDrinkImages(newState);
+        
+        // Verifica se o estado é final e agenda o reset
+        if (["Coca", "Pepsi", "Fanta", "Cancel"].includes(newState)) {
+            setTimeout(resetMachine, 3000); // Aguarda 3 segundos antes de resetar
+        }
     }
 
     function insertCoin(coin) {
