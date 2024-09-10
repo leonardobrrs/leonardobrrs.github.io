@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máquina de Vendas Automática</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        .vending-machine {
+            background-color: #222;
+            border-radius: 20px;
+            padding: 20px;
+            width: 550px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+        }
+        .display {
+            background-color: #333;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            color: #fff;
+            font-size: 18px;
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .buttons button {
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            flex: 1 1 45%;
+            transition: background-color 0.3s;
+        }
+        .buttons button:hover {
+            background-color: #0056b3;
+        }
+        .drinks-display {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .drinks-display img {
+            width: 100px;
+            height: 100px;
+        }
+        .automaton {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .automaton img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .log {
+            margin-top: 20px;
+            color: white;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<div class="vending-machine">
+    <div class="display">
+        Estado atual: <span id="current-state">$0.0</span>
+    </div>
+
+    <div class="drinks-display">
+        <img src="coca.png" alt="Coca-Cola" id="coca-img">
+        <img src="pepsi.png" alt="Pepsi" id="pepsi-img">
+        <img src="fanta.png" alt="Fanta" id="fanta-img">
+    </div>
+
+    <div class="buttons">
+        <button onclick="insertCoin('A')">Inserir $0.25</button>
+        <button onclick="insertCoin('B')">Inserir $1.0</button>
+        <button onclick="selectDrink('1')">Coca-Cola</button>
+        <button onclick="selectDrink('2')">Pepsi</button>
+        <button onclick="selectDrink('3')">Fanta</button>
+        <button onclick="cancel()">Cancelar</button>
+        <button onclick="resetMachine()" style="background-color: red;">Resetar Máquina</button>
+    </div>
+
+    <div class="automaton">
+        <img id="automaton-image" src="estado0.png" alt="Estado do Autômato">
+    </div>
+
+    <div class="log" id="log">
+        <h3>Registro de Transações:</h3>
+    </div>
+</div>
+
+<script>
+    let currentState = "$0.0";
+
+    const transitions = {
+        "$0.0": { "A": "$0.25", "B": "$1.0", "C": "Cancel" },
+        "$0.25": { "A": "$0.5", "B": "$1.25", "C": "Cancel" },
+        "$0.5": { "A": "$0.75", "B": "$1.5", "C": "Cancel" },
+        "$0.75": { "A": "$1.0", "B": "$1.75", "C": "Cancel" },
+        "$1.0": { "A": "$1.25", "B": "$2.0", "C": "Cancel" },
+        "$1.25": { "A": "$1.5", "B": "$1.25", "1": "Coca", "2": "$1.25", "3": "$1.25", "C": "Cancel" },
+        "$1.5": { "A": "$1.75", "B": "$1.5", "1": "Coca", "2": "Pepsi", "3": "$1.5", "C": "Cancel" },
+        "$1.75": { "A": "$2.0", "B": "$1.75", "1": "Coca", "2": "Pepsi", "3": "Fanta", "C": "Cancel" },
+        "$2.0": { "1": "Coca", "2": "Pepsi", "3": "Fanta", "C": "Cancel" },
+        "Coca": {},
+        "Pepsi": {},
+        "Fanta": {},
+        "Cancel": {}
+    };
+
+    function updateState(newState) {
+        currentState = newState;
+        document.getElementById("current-state").innerText = currentState;
+        document.getElementById("automaton-image").src = `estado${currentState}.png`;
+        logTransaction(newState);
+        updateDrinkImages(newState);
+    }
+
+    function insertCoin(coin) {
+        if (transitions[currentState] && transitions[currentState][coin]) {
+            updateState(transitions[currentState][coin]);
+        }
+    }
+
+    function selectDrink(drink) {
+        if (transitions[currentState] && transitions[currentState][drink]) {
+            updateState(transitions[currentState][drink]);
+        }
+    }
+
+    function cancel() {
+        updateState("Cancel");
+    }
+
+    function resetMachine() {
+        updateState("$0.0");
+        document.getElementById("log").innerHTML = "<h3>Registro de Transações:</h3>";
+    }
+
+    function logTransaction(state) {
+        const log = document.getElementById("log");
+        const newLogEntry = document.createElement("p");
+        newLogEntry.textContent = `Transição para estado: ${state}`;
+        log.appendChild(newLogEntry);
+    }
+
+    function updateDrinkImages(state) {
+        document.getElementById("coca-img").style.opacity = state === "Coca" ? "1" : "0.3";
+        document.getElementById("pepsi-img").style.opacity = state === "Pepsi" ? "1" : "0.3";
+        document.getElementById("fanta-img").style.opacity = state === "Fanta" ? "1" : "0.3";
+    }
+</script>
+
+</body>
+</html>
